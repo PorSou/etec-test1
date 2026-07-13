@@ -11,5 +11,5 @@ public class UserRequest {
 
     private String email;
 
-    private AddressRequest addressRequest;
+    private Long addressId;
 }

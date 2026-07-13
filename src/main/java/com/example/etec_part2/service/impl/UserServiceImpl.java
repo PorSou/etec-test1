@@ -6,43 +6,21 @@ import com.example.etec_part2.dto.response.UserResponse;
 import com.example.etec_part2.entity.Address;
 import com.example.etec_part2.entity.User;
 import com.example.etec_part2.exception.ResourceNotFoundException;
+import com.example.etec_part2.repository.AddressRepository;
 import com.example.etec_part2.repository.UserRepository;
 import com.example.etec_part2.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
-//    private UserResponse map(User user){
-//        UserResponse userResponse = new UserResponse();
-//        userResponse.setId(user.getId());
-//        userResponse.setName(user.getName());
-//        userResponse.setEmail(user.getEmail());
-//
-//        if(user.getAddress() != null){
-//            AddressResponse addressResponse = new AddressResponse();
-//            addressResponse.setId(user.getAddress().getId());
-//            addressResponse.setStreet(user.getAddress().getStreet());
-//            addressResponse.setCity(user.getAddress().getCity());
-//            addressResponse.setImage(user.getAddress().getImage());
-//
-//            userResponse.setAddressResponse(addressResponse);
-//        }
-//        return userResponse;
-//    }
+    private final AddressRepository addressRepository;
 
     // helper: keep both sides of the one-to-one relationship in sync
     private void linkAddress(User user, Address address) {
@@ -51,36 +29,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse create(UserRequest request, MultipartFile file) {
-
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path path = Paths.get("upload");
-        String imageUrl = "http://localhost:8080/upload/" + fileName;
-
-        try{
-
-            if(!Files.exists(path)){
-                Files.createDirectories(path);
-            }
-
-            Files.copy(file.getInputStream(), path.resolve(fileName));
-
-        }catch (IOException e){
-            throw new ResourceNotFoundException("Fail to upload file" + e);
-        }
+    public UserResponse create(UserRequest userRequest) {
 
         User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
+        user.setName(userRequest.getName());
+        user.setEmail(userRequest.getEmail());
 
-        if (request.getAddressRequest() != null) {
+        if (userRequest.getAddressId() != null) {
 
-            Address address = new Address();
-            address.setStreet(request.getAddressRequest().getStreet());
-            address.setCity(request.getAddressRequest().getCity());
-            address.setImage(imageUrl);
+            Address address = addressRepository.findById(userRequest.getAddressId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Address not found with id: " + userRequest.getAddressId()
+                    ));
 
-//            user.setAddress(address);
+            // user.setAddress(address)
             linkAddress(user,address);
         }
 
@@ -99,12 +61,9 @@ public class UserServiceImpl implements UserService {
             addressResponse.setImage(saved.getAddress().getImage());
 
             userResponse.setAddress(addressResponse);
-
         }
 
         return userResponse;
-
-
     }
 
     @Override
@@ -157,42 +116,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse update(Long id, UserRequest request, MultipartFile file) {
+    public UserResponse update(Long id, UserRequest userRequest) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
+        user.setName(userRequest.getName());
+        user.setEmail(userRequest.getEmail());
 
-        if (request.getAddressRequest() != null) {
-            Address address = user.getAddress();
-            if (address == null) {
-                address = new Address();
-            }
-            address.setStreet(request.getAddressRequest().getStreet());
-            address.setCity(request.getAddressRequest().getCity());
-
-            if(file != null && !file.isEmpty()){
-                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                Path path = Paths.get("upload");
-                String imageUrl = "http://localhost:8080/upload/" + fileName;
-
-                try{
-                    if(!Files.exists(path)){
-                        Files.createDirectories(path);
-                    }
-                    Files.copy(file.getInputStream(), path.resolve(fileName));
-
-                }catch(IOException e){
-                    throw new ResourceNotFoundException("Fail upload image " + e);
-                }
-                address.setImage(imageUrl);
-            }
-
-//            user.setAddress(address);
+        if(userRequest.getAddressId() != null){
+            Address address = addressRepository.findById(userRequest.getAddressId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Address not found with id: " + userRequest.getAddressId()
+                    ));
             linkAddress(user,address);
         }
+
 
         User updated = userRepository.save(user);
 

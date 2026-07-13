@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface UserService {
 
-    UserResponse create(UserRequest userRequest, MultipartFile file);
+    UserResponse create(UserRequest userRequest);
 
     List<UserResponse> findAll();
 
     UserResponse findById(Long id);
 
-    UserResponse update(Long id, UserRequest userRequest, MultipartFile file);
+    UserResponse update(Long id, UserRequest userRequest);
 
     void delete(Long id);
 

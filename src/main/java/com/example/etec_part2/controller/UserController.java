@@ -18,11 +18,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UserResponse create(
-            @ModelAttribute UserRequest userRequest,
-            @RequestParam("file") MultipartFile file
-    ) {
-        return userService.create(userRequest, file);
+    public UserResponse create(@ModelAttribute UserRequest userRequest) {
+        return userService.create(userRequest);
     }
 
     @GetMapping("/{id}")
@@ -38,10 +35,9 @@ public class UserController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserResponse update(
             @PathVariable Long id,
-            @ModelAttribute UserRequest userRequest,
-            @RequestParam(value = "file", required = false) MultipartFile file
+            @ModelAttribute UserRequest userRequest
     ) {
-        return userService.update(id, userRequest, file);
+        return userService.update(id, userRequest);
     }
 
     @DeleteMapping("/{id}")
