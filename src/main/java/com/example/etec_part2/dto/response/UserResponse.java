@@ -13,5 +13,5 @@ public class UserResponse {
 
     private String email;
 
-    private AddressResponse addressResponse;
+    private AddressResponse address;
 }

@@ -10,4 +10,5 @@ public class AddressRequest {
     private String street;
 
     private String city;
+
 }

@@ -2,18 +2,19 @@ package com.example.etec_part2.service;
 
 import com.example.etec_part2.dto.request.UserRequest;
 import com.example.etec_part2.dto.response.UserResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface UserService {
 
-    UserResponse create(UserRequest userRequest);
+    UserResponse create(UserRequest userRequest, MultipartFile file);
 
     List<UserResponse> findAll();
 
     UserResponse findById(Long id);
 
-    UserResponse update(Long id, UserRequest userRequest);
+    UserResponse update(Long id, UserRequest userRequest, MultipartFile file);
 
     void delete(Long id);
 

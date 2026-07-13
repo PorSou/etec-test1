@@ -20,6 +20,8 @@ public class Address {
 
     private String city;
 
+    private String image;
+
     @OneToOne(mappedBy = "address")
     private User user;
 }
